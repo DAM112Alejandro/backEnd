@@ -1,5 +1,7 @@
 package com.example.demo.resource;
 
+import com.example.demo.dto.dtoLibros;
+import com.example.demo.model.Autor;
 import com.example.demo.model.Libro;
 import com.example.demo.service.LibroService;
 import org.springframework.http.HttpStatus;
@@ -7,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 @Component
 @RestController
@@ -18,9 +21,22 @@ public class LibroResource {
         this.libroServices = libroServices;
     }
     @GetMapping("/all")
-    public ResponseEntity<List<Libro>> findAllLibros(){
+    public ResponseEntity<List<dtoLibros>> findAllLibros(){
         List<Libro> libros = libroServices.findAllLibros();
-        return new ResponseEntity<>(libros, HttpStatus.OK);
+        List<dtoLibros>librosCA=new ArrayList<>();
+        for (int i=0; i<libros.size();i++){
+            if (libros.get(i).getAutor() == null){
+                libros.get(i).setAutor(new Autor());
+            }
+            librosCA.add(new dtoLibros());
+            librosCA.get(i).setId(libros.get(i).getId());
+            librosCA.get(i).setTitulo(libros.get(i).getTitulo());
+            librosCA.get(i).setEdicion(libros.get(i).getEdicion());
+            librosCA.get(i).setAutor(libros.get(i).getAutor().getNombre()+" "+libros.get(i).getAutor().getApellido1());
+            librosCA.get(i).setCategoria(libros.get(i).getCategoria().getDescripcion());
+        }
+
+        return new ResponseEntity<>(librosCA, HttpStatus.OK);
     }
     @GetMapping("getById/{id}")
     public ResponseEntity<Libro> findLibroById(@PathVariable("id") Long id){
